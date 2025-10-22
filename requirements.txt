@@ -1,0 +1,5 @@
+notion_client
+yagmail
+python-dotenv
+matplotlib
+json5
