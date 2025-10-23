@@ -2,10 +2,6 @@
 
 This code takes the input from the To-Do list of a Notion Page, reads the checked items and converts them into a score. It also sends you a mail of your score for the day and the analytics graph of your previous scores.
 
-## Features
-
-- 
-
 ---
 
 # Setup Prerequisites
@@ -99,8 +95,8 @@ elif "Gym" in text :
 elif "Sleep" in text :
 	done_count += 2 #choose your own weights
 ```
-
-- The score limit is the max score you can achieve in a day. Set it to the sum of all the scores awarded to each block  “””You can change this sentence to : Set it according to your required score”””
+**IMPORTANT NOTICE : 
+- The score limit is the Boarderline Score , which means it will be marked as good (taken into the streak).Its basically the minimum score you need to achive in a day.
 
 ```python
 SCORE_LIMIT = 13 #Choose your daily score limit here
