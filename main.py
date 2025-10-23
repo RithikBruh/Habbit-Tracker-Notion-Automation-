@@ -15,6 +15,8 @@ SCORE_LIMIT = 13 #Choose your daily score limit here
 NOTION_SECRET=your_notion_secret
 PAGE_ID=your_page_id
 GMAIL_SECRET=your_gmail_app_password
+FROM_MAIL=your_email
+TO_MAIL=your_email
 """
 #------------------------ ENV Variables ------------------------#
 # Load environment variables from a .env file in the project root
