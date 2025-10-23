@@ -7,10 +7,10 @@ import os
 from dotenv import load_dotenv
 
 
-SCORE_LIMIT = 13 #Choose your daily score limit here
+SCORE_LIMIT = 13  # Choose your daily score limit here
 
 
-#TO get environment variables create .env file
+# TO get environment variables create .env file
 """Example .env file content:
 NOTION_SECRET=your_notion_secret
 PAGE_ID=your_page_id
@@ -18,41 +18,49 @@ GMAIL_SECRET=your_gmail_app_password
 FROM_MAIL=your_email
 TO_MAIL=your_email
 """
-#------------------------ ENV Variables ------------------------#
+
+# ------------------------ ENV Variables ------------------------#
 # Load environment variables from a .env file in the project root
 load_dotenv()
 
 # Expect a variable named NOTION_SECRET in the .env file
 SECRET = os.getenv("NOTION_SECRET")
 if not SECRET:
-    raise RuntimeError("NOTION_SECRET not found. Add NOTION_SECRET=your_secret to your .env or set the environment variable.")
+    raise RuntimeError(
+        "NOTION_SECRET not found. Add NOTION_SECRET=your_secret to your .env or set the environment variable."
+    )
 # SECRET = ""
 page_id = os.getenv("PAGE_ID")
 if not page_id:
-    raise RuntimeError("PAGE_ID not found. Add PAGE_ID=your_page_id to your .env or set the environment variable.")
+    raise RuntimeError(
+        "PAGE_ID not found. Add PAGE_ID=your_page_id to your .env or set the environment variable."
+    )
 
 gmail_secret = os.getenv("GMAIL_SECRET")
 if not gmail_secret:
-    raise RuntimeError("GMAIL_SECRET not found. Add GMAIL_SECRET=your_gmail_app_password to your .env or set the environment variable.")
+    raise RuntimeError(
+        "GMAIL_SECRET not found. Add GMAIL_SECRET=your_gmail_app_password to your .env or set the environment variable."
+    )
 
 FROM_MAIL = os.getenv("FROM_MAIL")
 if not FROM_MAIL:
-    raise RuntimeError("FROM_MAIL not found. Add FROM_MAIL=your_email to your .env or set the environment variable.")
+    raise RuntimeError(
+        "FROM_MAIL not found. Add FROM_MAIL=your_email to your .env or set the environment variable."
+    )
 
 TO_MAIL = os.getenv("TO_MAIL")
 if not TO_MAIL:
-    raise RuntimeError("TO_MAIL not found. Add TO_MAIL=your_email to your .env or set the environment variable.")
-#---------------------------------------------------------------#
+    raise RuntimeError(
+        "TO_MAIL not found. Add TO_MAIL=your_email to your .env or set the environment variable."
+    )
+# ---------------------------------------------------------------#
 
 
 notion = Client(auth=SECRET)
 
 
-
-
-
 current_date = datetime.now().strftime("%y-%m-%d")
-# current_date = "25-10-26"  # for testing
+# current_date = "25-10-26"  # for testing purposes
 print(f"📅  {current_date} ------------------------: \n")
 
 # ----- Fetch page blocks -----
@@ -76,24 +84,36 @@ for block in blocks:
         total_count += 1
         text = "".join([t["plain_text"] for t in block["to_do"]["rich_text"]])
         if block["to_do"]["checked"]:
-            if "Health Goals" in text :
-                done_count += 7 #choose your own weights
-            elif "gym" in text :
-                done_count += 3 #choose your own weights
-            elif "Family" in text :
-                done_count += 1 #choose your own weights
-            elif "Scrolling" in text :
-                done_count += 5 #choose your own weights
-            elif "SLEEP" in text :
-                done_count += 2 #choose your own weights
-            else :
-                done_count += 1 #choose your own weights
+            if "Health Goals" in text:
+                done_count += (
+                    7  # choose your own weights (calibrate according to your goals)
+                )
+            elif "gym" in text:
+                done_count += (
+                    3  # choose your own weights (calibrate according to your goals)
+                )
+            elif "Family" in text:
+                done_count += (
+                    1  # choose your own weights (calibrate according to your goals)
+                )
+            elif "Scrolling" in text:
+                done_count += (
+                    5  # choose your own weights (calibrate according to your goals)
+                )
+            elif "SLEEP" in text:
+                done_count += (
+                    2  # choose your own weights (calibrate according to your goals)
+                )
+            else:
+                done_count += (
+                    1  # choose your own weights (calibrate according to your goals)
+                )
 
 
-print(f" Score : {done_count} / 23")
+print(f" Score : {done_count} / {total_count}")
 
 
-score = done_count 
+score = done_count  # calibrate your score here
 
 """Total score SCORE_LIMIT>="""
 
@@ -138,18 +158,16 @@ highest_steak = highest_steak_data.get("highest_steak", 0)
 extra_html = ""
 # check if new record
 if steak > highest_steak and steak != 0:
-    # new record 
+    # new record
     extra_html = f"""
       <h2 style="color:#FFD700;">🏆 New Highest Streak Record! 🎉
       """
     highest_steak = steak
     with open("highest_steak.json", "w") as f:
         json.dump({"highest_steak": highest_steak}, f, indent=2)
-#--------------
+# --------------
 
 
-# ----- Your score -----
-# score = 15  # Replace with your score
 
 # ----- Decide message -----
 if score >= SCORE_LIMIT:
@@ -162,11 +180,10 @@ else:
     color = "#F44336"  # red
 
 # ----- HTML Email Template -----
-    
+
 # Generate and save the score plot
 score_plot.plot(
-    list(score_data.keys()),
-    [score_data[date][0] for date in score_data.keys()]
+    list(score_data.keys()), [score_data[date][0] for date in score_data.keys()]
 )
 
 html_content = f"""
@@ -191,25 +208,27 @@ yag = yagmail.SMTP(FROM_MAIL, gmail_secret)
 # Attach an image
 attachments = ["score_plot.png"]  # path to your image file
 
-# Send the email
-# yag.send(to=to, subject=subject, contents=body, attachments=attachments)
-
-yag.send(to=TO_MAIL, subject=f"Your Daily Score: {score}", contents=html_content,attachments=attachments)
+yag.send(
+    to=TO_MAIL,
+    subject=f"Your Daily Score: {score}",
+    contents=html_content,
+    attachments=attachments,
+)
 
 print("📧 Email sent successfully!")
 
 
-
-
-#Unchceck al boxex 
+# Uncheck all boxes
 def get_children(block_id):
     """Fetch children blocks of a page or block."""
     response = notion.blocks.children.list(block_id)
     return response.get("results", [])
 
+
 def uncheck_todo_block(block_id):
     """Set 'checked' field of to-do block to False."""
     notion.blocks.update(block_id, to_do={"checked": False})
+
 
 def process_block(block_id):
     """Recursively uncheck all to-do blocks inside the page."""
