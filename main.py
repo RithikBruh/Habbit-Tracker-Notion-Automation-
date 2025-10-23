@@ -6,6 +6,10 @@ import score_plot
 import os
 from dotenv import load_dotenv
 
+
+SCORE_LIMIT = 13 #Choose your daily score limit here
+
+#------------------------ ENV Variables ------------------------#
 # Load environment variables from a .env file in the project root
 load_dotenv()
 
@@ -22,6 +26,9 @@ gmail_secret = os.getenv("GMAIL_SECRET")
 if not gmail_secret:
     raise RuntimeError("GMAIL_SECRET not found. Add GMAIL_SECRET=your_gmail_app_password to your .env or set the environment variable.")
 
+#---------------------------------------------------------------#
+
+
 notion = Client(auth=SECRET)
 
 
@@ -30,7 +37,7 @@ notion = Client(auth=SECRET)
 
 current_date = datetime.now().strftime("%y-%m-%d")
 # current_date = "25-10-26"  # for testing
-log_msg = f"[{current_date}] :"
+print(f"📅  {current_date} ------------------------: \n")
 
 # ----- Fetch page blocks -----
 blocks = []
@@ -47,36 +54,32 @@ while True:
 # ----- Count checkboxes -----
 done_count = 0
 total_count = 0
-main_count  = 0
+
 for block in blocks:
     if block["type"] == "to_do":
         total_count += 1
         text = "".join([t["plain_text"] for t in block["to_do"]["rich_text"]])
         if block["to_do"]["checked"]:
             if "Health Goals" in text :
-                done_count += 7
-                main_count += 5
+                done_count += 7 #choose your own weights
             elif "gym" in text :
-                done_count += 3
-                main_count += 3
+                done_count += 3 #choose your own weights
             elif "Family" in text :
-                done_count += 1
+                done_count += 1 #choose your own weights
             elif "Scrolling" in text :
-                done_count += 5
-                main_count += 3
+                done_count += 5 #choose your own weights
             elif "SLEEP" in text :
-                done_count += 2
-                main_count += 2
+                done_count += 2 #choose your own weights
             else :
-                done_count += 1
+                done_count += 1 #choose your own weights
 
-# TODO : reset all checkboxes to false
 
-print(f" Score : {done_count} / 23 , Main Score : {main_count}/13")
+print(f" Score : {done_count} / 23")
 
 
 score = done_count 
-"""Total score 13>="""
+
+"""Total score SCORE_LIMIT>="""
 
 
 # ----- Update JSON File -----
@@ -86,9 +89,7 @@ json_file_path = "data.json"
 try:
     with open(json_file_path, "r") as f:
         score_data = json.load(f)
-        log_msg += " Existing score data found."
 except (FileNotFoundError, json.JSONDecodeError) as e:
-    log_msg += " No existing score data found. Creating new file."
     score_data = {}
 
 # Update with today's score
@@ -101,13 +102,13 @@ if prev_steak:
 else:
     steak = 1
 
-if score < 13:
+if score < SCORE_LIMIT:
     steak = 0
 
 # Write back to file
 
 
-score_data[current_date] = [score, steak, score >= 13]
+score_data[current_date] = [score, steak, score >= SCORE_LIMIT]
 
 with open(json_file_path, "w") as f:
     json.dump(score_data, f, indent=2)
@@ -135,7 +136,7 @@ if steak > highest_steak and steak != 0:
 # score = 15  # Replace with your score
 
 # ----- Decide message -----
-if score >= 13:
+if score >= SCORE_LIMIT:
     title = "🎉 Congrats! Great Job Today!"
     message = "You did amazing! Keep up the good work and stay consistent."
     color = "#4CAF50"  # green
