@@ -23,7 +23,7 @@ This code takes the input from the To-Do list of a Notion Page, reads the checke
 
 ## Installing the code and requirements
 
--Clone the GitHub repository
+-   Clone the GitHub repository
 - Open CMD in the folder and run the following command : `pip install -r requirements.txt`
 
 ## Getting the Notion Integration Key
