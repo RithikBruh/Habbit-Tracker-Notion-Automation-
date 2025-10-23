@@ -1,4 +1,4 @@
-                         # Notion Habit Tracker  
+#                                                          Notion Habit Tracker  
 
 This code takes the input from the To-Do list of a Notion Page, reads the checked items and converts them into a score. It also sends you a mail of your score for the day and the analytics graph of your previous scores.
 
