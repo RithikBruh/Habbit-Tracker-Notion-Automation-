@@ -9,6 +9,13 @@ from dotenv import load_dotenv
 
 SCORE_LIMIT = 13 #Choose your daily score limit here
 
+
+#TO get environment variables create .env file
+"""Example .env file content:
+NOTION_SECRET=your_notion_secret
+PAGE_ID=your_page_id
+GMAIL_SECRET=your_gmail_app_password
+"""
 #------------------------ ENV Variables ------------------------#
 # Load environment variables from a .env file in the project root
 load_dotenv()
@@ -26,6 +33,13 @@ gmail_secret = os.getenv("GMAIL_SECRET")
 if not gmail_secret:
     raise RuntimeError("GMAIL_SECRET not found. Add GMAIL_SECRET=your_gmail_app_password to your .env or set the environment variable.")
 
+FROM_MAIL = os.getenv("FROM_MAIL")
+if not FROM_MAIL:
+    raise RuntimeError("FROM_MAIL not found. Add FROM_MAIL=your_email to your .env or set the environment variable.")
+
+TO_MAIL = os.getenv("TO_MAIL")
+if not TO_MAIL:
+    raise RuntimeError("TO_MAIL not found. Add TO_MAIL=your_email to your .env or set the environment variable.")
 #---------------------------------------------------------------#
 
 
@@ -171,14 +185,14 @@ html_content = f"""
 
 
 # ----- Send Email -----
-yag = yagmail.SMTP("sairithikmangipudi@gmail.com", gmail_secret)
+yag = yagmail.SMTP(FROM_MAIL, gmail_secret)
 # Attach an image
 attachments = ["score_plot.png"]  # path to your image file
 
 # Send the email
 # yag.send(to=to, subject=subject, contents=body, attachments=attachments)
 
-yag.send(to="theelectronoobs@gmail.com", subject=f"Your Daily Score: {score}", contents=html_content,attachments=attachments)
+yag.send(to=TO_MAIL, subject=f"Your Daily Score: {score}", contents=html_content,attachments=attachments)
 
 print("📧 Email sent successfully!")
 
