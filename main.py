@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 
 
-SCORE_LIMIT = 13  # Choose your daily score limit here
+SCORE_LIMIT = 13  #Choose your daily score limit here
 
 
 # TO get environment variables create .env file
