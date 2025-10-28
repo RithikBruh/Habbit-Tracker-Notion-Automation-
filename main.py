@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 
 
-SCORE_LIMIT = 13  #Choose your daily score limit here
+SCORE_LIMIT = 12 #Choose your daily score limit here
 
 
 # TO get environment variables create .env file
@@ -84,25 +84,25 @@ for block in blocks:
         total_count += 1
         text = "".join([t["plain_text"] for t in block["to_do"]["rich_text"]])
         if block["to_do"]["checked"]:
-            if "Health Goals" in text:
+            if "gym" in text.lower():
                 done_count += (
-                    7  # choose your own weights (calibrate according to your goals)
-                )
-            elif "gym" in text:
-                done_count += (
-                    3  # choose your own weights (calibrate according to your goals)
-                )
-            elif "Family" in text:
-                done_count += (
-                    1  # choose your own weights (calibrate according to your goals)
+                    4  # choose your own weights (calibrate according to your goals)
                 )
             elif "Scrolling" in text:
                 done_count += (
-                    5  # choose your own weights (calibrate according to your goals)
+                    4  # choose your own weights (calibrate according to your goals)
                 )
             elif "SLEEP" in text:
                 done_count += (
+                    4  # choose your own weights (calibrate according to your goals)
+                )
+            elif "Neck" in text:
+                done_count += (
                     2  # choose your own weights (calibrate according to your goals)
+                )
+            elif "cardio" in text.lower():
+                done_count += (
+                    3  # choose your own weights (calibrate according to your goals)
                 )
             else:
                 done_count += (
@@ -183,7 +183,7 @@ else:
 
 # Generate and save the score plot
 score_plot.plot(
-    list(score_data.keys()), [score_data[date][0] for date in score_data.keys()]
+    list(score_data.keys()), [score_data[date][0] for date in score_data.keys()], score_limit=SCORE_LIMIT
 )
 
 html_content = f"""

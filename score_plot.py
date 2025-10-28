@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-def plot(dates,scores) :
+def plot(dates,scores,score_limit=12) :
     # Example data
 
     # Bar colors: green if score > 13 else red
@@ -15,10 +15,13 @@ def plot(dates,scores) :
     bars = plt.bar(dates, scores, color=colors, width=0.5)
 
     # Add white text on bars
+    max_score = max(scores) 
+
     for bar, score in zip(bars, scores):
         height = bar.get_height()
+        extra = "!" if score == max_score  and score >= score_limit else ""
         plt.text(bar.get_x() + bar.get_width()/2, height - 0.5,
-                str(score), ha='center', va='top', color='white', fontsize=12, fontweight='bold')
+                str(score)+extra, ha='center', va='top', color='white', fontsize=12, fontweight='bold')
 
     # Axes labels and title in white
     plt.ylabel("Score", color='white', fontsize=12)
@@ -28,6 +31,8 @@ def plot(dates,scores) :
     # Tick labels in white
     plt.xticks(rotation=45, color='white')
     plt.yticks(color='white')
+
+    plt.axhline(y=score_limit, color='yellow', linestyle='--', label="")
 
     # Remove spines or make them white
     for spine in ax.spines.values():
@@ -39,17 +44,6 @@ def plot(dates,scores) :
     # Save image
     img_path = "score_plot.png"
     plt.savefig(img_path, facecolor='#2c3e50', transparent=False)
-    #conv to base 64
-
-    # import io, base64
-
-    # buf = io.BytesIO()
-    # plt.savefig(buf, format='png', facecolor='#f5f5f5')  # match card bg
-    # plt.close()
-    # buf.seek(0)
-    # img_base64 = base64.b64encode(buf.read()).decode('utf-8')
-    # plt.close()
-    # return img_base64
 
 
 if __name__ == "__main__":
