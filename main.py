@@ -7,9 +7,14 @@ import os
 from dotenv import load_dotenv
 
 
-SCORE_LIMIT = 12 #Choose your daily score limit here
+SCORE_LIMIT = 14  # Choose your daily score limit here
+DEFAULT_PTS = 1  # default point if not specified
 
-
+# Define paths for data files
+data_dir = os.path.join(os.path.dirname(__file__), "data")
+highest_streak_path = os.path.join(data_dir, "highest_streak.json")
+history_data_path = os.path.join(data_dir, "history_data.json")
+score_data_path = os.path.join(data_dir, "score_data.json")
 # TO get environment variables create .env file
 """Example .env file content:
 NOTION_SECRET=your_notion_secret
@@ -78,37 +83,22 @@ while True:
 # ----- Count checkboxes -----
 done_count = 0
 total_count = 0
+today_history = {}
 
 for block in blocks:
     if block["type"] == "to_do":
         total_count += 1
         text = "".join([t["plain_text"] for t in block["to_do"]["rich_text"]])
         if block["to_do"]["checked"]:
-            if "gym" in text.lower():
-                done_count += (
-                    4  # choose your own weights (calibrate according to your goals)
-                )
-            elif "Scrolling" in text:
-                done_count += (
-                    4  # choose your own weights (calibrate according to your goals)
-                )
-            elif "SLEEP" in text:
-                done_count += (
-                    4  # choose your own weights (calibrate according to your goals)
-                )
-            elif "Neck" in text:
-                done_count += (
-                    2  # choose your own weights (calibrate according to your goals)
-                )
-            elif "cardio" in text.lower():
-                done_count += (
-                    3  # choose your own weights (calibrate according to your goals)
-                )
-            else:
-                done_count += (
-                    1  # choose your own weights (calibrate according to your goals)
-                )
+            today_history[text] = True
+            try:
+                pts = int(text[text.index("(") + 1 : text.index(")")])
+            except ValueError:
+                pts = DEFAULT_PTS  # default point if not specified
 
+            done_count += pts
+        else:
+            today_history[text] = False
 
 print(f" Score : {done_count} / {total_count}")
 
@@ -118,55 +108,61 @@ score = done_count  # calibrate your score here
 """Total score SCORE_LIMIT>="""
 
 
-# ----- Update JSON File -----
-json_file_path = "data.json"
+# ----- Update JSON File 's -----
 
+""" Update History """
+with open(history_data_path, "r") as f:
+    history_data = json.load(f)
+    history_data[current_date] = today_history
+with open(history_data_path, "w") as f:
+    json.dump(history_data, f, indent=4)
+
+""" Update Scores """
 # Read existing scores
 try:
-    with open(json_file_path, "r") as f:
+    with open(score_data_path, "r") as f:
         score_data = json.load(f)
 except (FileNotFoundError, json.JSONDecodeError) as e:
     score_data = {}
 
 # Update with today's score
 last_key = list(score_data.keys())[-1] if score_data else None
-prev_steak = score_data[last_key][1] if last_key else None
+prev_streak = score_data[last_key][1] if last_key else None
 
 
-if prev_steak:
-    steak = prev_steak + 1
+if prev_streak:
+    streak = prev_streak + 1
 else:
-    steak = 1
+    streak = 1
 
 if score < SCORE_LIMIT:
-    steak = 0
+    streak = 0
 
 # Write back to file
 
 
-score_data[current_date] = [score, steak, score >= SCORE_LIMIT]
+score_data[current_date] = [score, streak, score >= SCORE_LIMIT]
 
-with open(json_file_path, "w") as f:
+with open(score_data_path, "w") as f:
     json.dump(score_data, f, indent=2)
 
-# get highest steak / update if needed
-with open("highest_steak.json", "r") as f:
-    highest_steak_data = json.load(f)
+# get highest streak / update if needed
+with open(highest_streak_path, "r") as f:
+    highest_streak_data = json.load(f)
 
-highest_steak = highest_steak_data.get("highest_steak", 0)
+highest_streak = highest_streak_data.get("highest_streak", 0)
 
 extra_html = ""
 # check if new record
-if steak > highest_steak and steak != 0:
+if streak > highest_streak and streak != 0:
     # new record
     extra_html = f"""
       <h2 style="color:#FFD700;">🏆 New Highest Streak Record! 🎉
       """
-    highest_steak = steak
-    with open("highest_steak.json", "w") as f:
-        json.dump({"highest_steak": highest_steak}, f, indent=2)
+    highest_streak = streak
+    with open(highest_streak_path, "w") as f:
+        json.dump({"highest_streak": highest_streak}, f, indent=2)
 # --------------
-
 
 
 # ----- Decide message -----
@@ -182,8 +178,10 @@ else:
 # ----- HTML Email Template -----
 
 # Generate and save the score plot
-score_plot.plot(
-    list(score_data.keys()), [score_data[date][0] for date in score_data.keys()], score_limit=SCORE_LIMIT
+plot_img_path = score_plot.plot(
+    list(score_data.keys()),
+    [score_data[date][0] for date in score_data.keys()],
+    score_limit=SCORE_LIMIT,
 )
 
 html_content = f"""
@@ -192,8 +190,8 @@ html_content = f"""
     <div style="max-width:700px; margin:auto; background:white; padding:30px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); text-align:center;">
       <h1 style="color:{color};">{title}</h1>
       <p style="font-size:18px;">Score 💯: <strong>{score} pts</strong></p>
-      <p style="font-size:18px;"> streak 🥩: <strong>{steak} days</strong></p>
-      <p style="font-size:18px;">Highest streak 🥩: <strong>{highest_steak} days</strong></p>
+      <p style="font-size:18px;"> streak 🥩: <strong>{streak} days</strong></p>
+      <p style="font-size:18px;">Highest streak 🥩: <strong>{highest_streak} days</strong></p>
     {extra_html}
       <p style="font-size:16px; color:#555;">{message}</p>
       <!-- Embed the saved plot -->
@@ -206,7 +204,7 @@ html_content = f"""
 # ----- Send Email -----
 yag = yagmail.SMTP(FROM_MAIL, gmail_secret)
 # Attach an image
-attachments = ["score_plot.png"]  # path to your image file
+attachments = [plot_img_path]  # path to your image file
 
 yag.send(
     to=TO_MAIL,
